@@ -1,0 +1,14 @@
+numpy
+pandas
+matplotlib
+seaborn
+scikit-learn
+scipy
+jupyter
+sqlalchemy
+pytest
+sphinx
+ipython
+black
+pylint
+
