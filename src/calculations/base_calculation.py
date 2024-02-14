@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class BaseCalculation():
+class BaseCalculation(ABC):
 	def __init__(self, molecule)
 
 
@@ -11,7 +11,7 @@ class BaseCalculation():
 		"""
 		pass
 
+	@abstractmethod
 	def numerical_hessian_splitted(self):
 		pass
 
-		
