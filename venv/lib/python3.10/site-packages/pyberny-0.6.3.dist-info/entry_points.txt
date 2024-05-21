@@ -1,0 +1,3 @@
+[console_scripts]
+berny=berny.cli:main
+
