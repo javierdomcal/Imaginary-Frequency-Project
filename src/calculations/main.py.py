@@ -6,12 +6,13 @@ import matplotlib.pyplot as plt
 from pyscf import gto
 import numpy as np
 
-
-# basiss = ['6-31G', '6-31G*', '6-31G**',
-#          '6-31+G', '6-31+G*', '6-31+G**',
+basiss = ['6-31G', '6-31G*', '6-31G**',
+          '6-31+G', '6-31+G*', '6-31+G**',
+          '6-31++G', '6-31++G*', '6-31++G**']
+# basiss = [ '6-31+G**',
 #          '6-31++G', '6-31++G*', '6-31++G**']
-#basiss = ['def2-TZVP', 'def2-TZVPP', 'def2-TZVPPD']
-basiss = ['6-31G']
+# basiss = ['def2-TZVP', 'def2-TZVPP', 'def2-TZVPPD']
+# basiss = ['6-31G']
 
 hf_grads = {}
 hf_hessians = {}
@@ -86,12 +87,13 @@ def calculation_MP2(basis, molecule, symm=True, opt=True):
     return mp2_hessians
 
 
-test_name = 'nevada'
-result = trials_deleting(basiss[0], molecule, test_name)
+test_name = 'kansas'
+for basis in basiss:
+    result = trials_deleting(basis, molecule, test_name)
 
-#tasks = [calculate_task(input_value, molecule, 'mp2') for input_value in basiss]
+# tasks = [calculate_task(input_value, molecule, 'mp2') for input_value in basiss]
 
-#results = [task for task in tasks]
+# results = [task for task in tasks]
 
 # for input_value, result in zip(basiss, results):
 #    print(f"Calculation for input {input_value} completed with result: {result}")

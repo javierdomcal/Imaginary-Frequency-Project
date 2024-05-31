@@ -120,8 +120,8 @@ class MP2Calculation(BaseCalculation):
 
                 eri1 = mol.intor('int2e_ip1', comp=3, aosym='s2kl',
                                  shls_slice=shls_slice).reshape(3, nf, nao, -1)
-                #de[k] -= numpy.einsum('xijk,ijk->x', eri1, dm2buf) * 2
-                #de_1[k] -= numpy.einsum('xijk,ijk->x', eri1, dm2buf) * 2
+                de[k] -= numpy.einsum('xijk,ijk->x', eri1, dm2buf) * 2
+                de_1[k] -= numpy.einsum('xijk,ijk->x', eri1, dm2buf) * 2
 
                 dm2buf = None
     # HF part
@@ -189,6 +189,7 @@ class MP2Calculation(BaseCalculation):
         time1 = log.timer_debug1('h1 and JK1', *time1)
 
         # Hartree-Fock part contribution
+        dm1[:] = 0
         dm1p = hf_dm1 + dm1 * 2
         dm1 += hf_dm1
         zeta += rhf_grad.make_rdm1e(mo_energy, mo_coeff, mp.mo_occ)
@@ -196,22 +197,22 @@ class MP2Calculation(BaseCalculation):
         for k, ia in enumerate(atmlst):
             shl0, shl1, p0, p1 = offsetdic[ia]
     # s[1] dot I, note matrix im1 is not hermitian
-            #de[k] += numpy.einsum('xij,ij->x', s1[:, p0:p1], im1[p0:p1])
-            #de_2[k] += numpy.einsum('xij,ij->x', s1[:, p0:p1], im1[p0:p1])
-            #de[k] += numpy.einsum('xji,ij->x', s1[:, p0:p1], im1[:, p0:p1])
-            #de_3[k] += numpy.einsum('xji,ij->x', s1[:, p0:p1], im1[:, p0:p1])
+            de[k] += numpy.einsum('xij,ij->x', s1[:, p0:p1], im1[p0:p1])
+            de_2[k] += numpy.einsum('xij,ij->x', s1[:, p0:p1], im1[p0:p1])
+            de[k] += numpy.einsum('xji,ij->x', s1[:, p0:p1], im1[:, p0:p1])
+            de_3[k] += numpy.einsum('xji,ij->x', s1[:, p0:p1], im1[:, p0:p1])
     # h[1] \dot DM, contribute to f1
             h1ao = hcore_deriv(ia)
             de[k] += numpy.einsum('xij,ji->x', h1ao, dm1)
             de_4[k] += numpy.einsum('xij,ji->x', h1ao, dm1)
     # -s[1]*e \dot DM,  contribute to f1
-            #de[k] -= numpy.einsum('xij,ij->x', s1[:, p0:p1], zeta[p0:p1])
-            #de_5[k] -= numpy.einsum('xij,ij->x', s1[:, p0:p1], zeta[p0:p1])
-            #de[k] -= numpy.einsum('xji,ij->x', s1[:, p0:p1], zeta[:, p0:p1])
-            #de_6[k] -= numpy.einsum('xji,ij->x', s1[:, p0:p1], zeta[:, p0:p1])
+            de[k] -= numpy.einsum('xij,ij->x', s1[:, p0:p1], zeta[p0:p1])
+            de_5[k] -= numpy.einsum('xij,ij->x', s1[:, p0:p1], zeta[p0:p1])
+            de[k] -= numpy.einsum('xji,ij->x', s1[:, p0:p1], zeta[:, p0:p1])
+            de_6[k] -= numpy.einsum('xji,ij->x', s1[:, p0:p1], zeta[:, p0:p1])
     # -vhf[s_ij[1]],  contribute to f1, *2 for s1+s1.T
-            #de[k] -= numpy.einsum('xij,ij->x', s1[:, p0:p1], vhf_s1occ[p0:p1]) * 2
-            #de_7[k] -= numpy.einsum('xij,ij->x', s1[:, p0:p1], vhf_s1occ[p0:p1]) * 2
+            de[k] -= numpy.einsum('xij,ij->x', s1[:, p0:p1], vhf_s1occ[p0:p1]) * 2
+            de_7[k] -= numpy.einsum('xij,ij->x', s1[:, p0:p1], vhf_s1occ[p0:p1]) * 2
             de[k] -= numpy.einsum('xij,ij->x', vhf1[k], dm1p)
             de_8[k] -= numpy.einsum('xij,ij->x', vhf1[k], dm1p)
 
