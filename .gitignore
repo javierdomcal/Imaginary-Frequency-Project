@@ -1,5 +1,24 @@
-__pycache__/
+# Ignorar entornos virtuales
 venv/
+ENV/
+env/
+.venv/
+
+# Ignorar archivos de configuración específicos del entorno
+*.local
 *.pyc
 *.pyo
-.DS_Store
+*.pyd
+__pycache__/
+*.swp
+
+# Ignorar archivos de registro
+*.log
+
+# Ignorar configuraciones de IDE
+.vscode/
+.idea/
+
+# Ignorar resultados
+results/
+*.html
