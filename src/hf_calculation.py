@@ -1,18 +1,11 @@
 from base_calculation import BaseCalculation
-from pyscf.geomopt import berny_solver
-from pyscf import scf, gto, grad, hessian
-from pyscf.lib import logger
 import numpy
-import ctypes
-from pyscf import gto
-from pyscf import lib
+from pyscf import gto, scf, grad, hessian, lib, geomopt
 from pyscf.lib import logger
-from pyscf.scf import hf, _vhf
 from pyscf.gto.mole import is_au
-import pyscf.grad as grad
+import pyscf.grad as grad_mod
 import pyscf.hessian.thermo as thermo
-from functools import reduce
-from pyscf.data import nist
+from pyscf.geomopt import berny_solver
 
 
 class HFCalculation(BaseCalculation):
@@ -92,36 +85,12 @@ class HFCalculation(BaseCalculation):
             return de, (de_1, de_2, de_3, de_4)
         return de
 
-    def numerical_hessian(self, step=0.00005291772, components=None):
-        self.mol.symmetry = None
-        natm = self.mol.natm
-        grad, grad_parts = self.analytical_gradient()
+    def _run_calculation(self, mol):
+        return scf.RHF(mol).run()
 
-        hessian = numpy.zeros((natm, natm, 3, 3))
-
-        hessian_forces = []
-        for force in grad_parts:
-            hessian_forces.append(numpy.zeros((natm, natm, 3, 3)))
-
-        for atom in range(natm):
-            for j, coord in enumerate(['x', 'y', 'z']):
-                coords = self.mol.atom_coords()
-                coords[atom, j] += step
-                mol_moved = self.mol.set_geom_(coords, inplace=False, symmetry=None)
-                mol_moved.symmetry = None
-
-                energy_moved = scf.RHF(mol_moved).run()
-
-                newHF = HFCalculation(mol_moved, self.mol.basis, symm=False, opt=False)
-
-                grad_moved, grad_parts_moved = newHF.analytical_gradient()
-
-                hessian[:, atom, :, j] = (grad_moved - grad) / step
-
-                for n, (force, force_moved) in enumerate(zip(grad_parts, grad_parts_moved)):
-                    hessian_forces[n][:, atom, :, j] = (force_moved - force) / step
-
-        return hessian, hessian_forces
+    def _calculate_gradient(self, mol):
+        newHF = HFCalculation(mol, self.mol.basis, symm=False, opt=False)
+        return newHF.analytical_gradient()
 
     def analytical_hessian(self):
         """
@@ -145,6 +114,6 @@ if __name__ == "__main__":
         basis='sto-3g'
     )
 
-    HFcalc = HFCalculation(mol, opt=True)
+    HFcalc = HFCalculation(mol, mol.basis, opt=True)
     freq = HFcalc.frequencies()
     print(thermo.dump_normal_mode(mol, freq))

@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 from pyscf import gto
 import numpy as np
 
-basiss = ['6-31G', '6-31G*', '6-31G**',
-          '6-31+G', '6-31+G*', '6-31+G**',
-          '6-31++G', '6-31++G*', '6-31++G**']
+basiss = ['6-311G', '6-311G*', '6-311G**',
+          '6-311+G', '6-311+G*', '6-311+G**',
+          '6-311++G', '6-311++G*', '6-311++G**']
 # basiss = [ '6-31+G**',
 #          '6-31++G', '6-31++G*', '6-31++G**']
 # basiss = ['def2-TZVP', 'def2-TZVPP', 'def2-TZVPPD']
@@ -55,7 +55,7 @@ def calculate_task(input_value, molecule, calc):
 def trials_deleting(input_value, molecule, name):
     result = calculation_MP2(input_value, molecule)
 
-    with open(f'../../results/result_{name}_{input_value}.txt', 'w') as f:
+    with open(f'../results/result_{name}_{input_value}.txt', 'w') as f:
         for item in result:
             f.write(str(item) + '\n')
     return result
@@ -87,7 +87,7 @@ def calculation_MP2(basis, molecule, symm=True, opt=True):
     return mp2_hessians
 
 
-test_name = 'kansas'
+test_name = 'arizona'
 for basis in basiss:
     result = trials_deleting(basis, molecule, test_name)
 

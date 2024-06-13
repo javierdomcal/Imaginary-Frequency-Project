@@ -146,7 +146,7 @@ def harmonic_analysis_moved(mol, hess, exclude_trans=False, exclude_rot=False,
         new_mode = numpy.zeros((natm, 3))
         unequal_mode = numpy.zeros((natm, 3))
 
-        for atom in range(0, natm):
+        for atom in range(0, 12):
             row = cartesian_this_mode[atom, :]
 
             moved_row = numpy.dot(row, reflexion) @ rotation
@@ -155,7 +155,7 @@ def harmonic_analysis_moved(mol, hess, exclude_trans=False, exclude_rot=False,
             unequal_row = numpy.dot(row, reflexion)
             unequal_mode[relation_original[atom] - 1, :] = unequal_row
 
-        threshold = 0.001
+        threshold = 0.01
 
         if numpy.allclose(new_mode, cartesian_this_mode, atol=threshold):
             problematic_freq.append(i)
@@ -176,6 +176,15 @@ def harmonic_analysis_moved(mol, hess, exclude_trans=False, exclude_rot=False,
     return results, transformed_hess, h_diagonal, problematic_freq
 
 
+def run_hessian_analysis(mol):
+    mf = scf.RHF(mol).run()
+    mol = berny_solver.optimize(mf)
+    mf_opt = scf.RHF(mol).run()
+    hess = mf_opt.Hessian().kernel()
+    freq, hess, h, problematic_freq = harmonic_analysis_moved(mol, hess, exclude_trans=False, exclude_rot=False, imaginary_freq=False)
+    return freq, hess, h, problematic_freq
+
+
 if __name__ == '__main__':
 
     benzene_d6d_init = gto.M(
@@ -193,16 +202,9 @@ H      0.000000    -2.490314     0.000000
 H     -2.157746    -1.245157     0.000000
 H     -2.157746     1.245157     0.000000
     ''',
-        basis='6-311++G**',
+        basis='6-31G',
         symmetry=False
     )
 
     benzene_d6d_init.build()
-    mol = benzene_d6d_init
-    mf = scf.RHF(benzene_d6d_init).run()
-    mol = berny_solver.optimize(mf)
-
-    mf_opt = scf.RHF(mol).run()
-    h = mf_opt.Hessian().kernel()
-
-    freq, hess, h, problematic_freq = harmonic_analysis_moved(mol, h, exclude_trans=False, exclude_rot=False, imaginary_freq=False)
+    freq, hess, h, problematic_freq = run_hessian_analysis(optimized_mol)

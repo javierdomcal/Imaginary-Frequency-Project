@@ -1,22 +1,13 @@
 from base_calculation import BaseCalculation
 from pyscf.geomopt import berny_solver
-from pyscf import scf, gto, grad, hessian, mp
+from pyscf import gto, scf, grad, mp, lib, geomopt
 from pyscf.lib import logger
-import numpy
-import ctypes
-from pyscf import gto
-from pyscf import lib
-from pyscf.lib import logger
-from pyscf.scf import hf, _vhf
-from pyscf.gto.mole import is_au
-import pyscf.grad as grad
-import pyscf.hessian.thermo as thermo
-from functools import reduce
-from pyscf.data import nist
-from functools import reduce
-from pyscf.grad import rhf as rhf_grad
 from pyscf.mp import mp2
 from pyscf.ao2mo import _ao2mo
+from pyscf.grad import rhf as rhf_grad
+import numpy
+from functools import reduce
+from pyscf.data import nist
 
 
 class MP2Calculation(BaseCalculation):
@@ -221,36 +212,12 @@ class MP2Calculation(BaseCalculation):
             return de, (de_1, de_2, de_3, de_4, de_5, de_6, de_7, de_8)
         return de
 
-    def numerical_hessian(self, step=0.0005291772):
-        self.mol.symmetry = None
-        natm = self.mol.natm
-        grad, grad_parts = self.analytical_gradient()
+    def _run_calculation(self, mol):
+        return scf.RHF(mol).run()
 
-        hessian = numpy.zeros((natm, natm, 3, 3))
-
-        hessian_forces = []
-        for force in grad_parts:
-            hessian_forces.append(numpy.zeros((natm, natm, 3, 3)))
-
-        for atom in range(natm):
-            for j, coord in enumerate(['x', 'y', 'z']):
-                coords = self.mol.atom_coords()
-                coords[atom, j] += step
-                mol_moved = self.mol.set_geom_(coords, inplace=False, symmetry=None)
-                mol_moved.symmetry = None
-
-                energy_moved = scf.RHF(mol_moved).run()
-
-                newMP2 = MP2Calculation(mol_moved, self.mol.basis, symm=False, opt=False)
-
-                grad_moved, grad_parts_moved = newMP2.analytical_gradient()
-
-                hessian[:, atom, :, j] = (grad_moved - grad) / step
-
-                for n, (force, force_moved) in enumerate(zip(grad_parts, grad_parts_moved)):
-                    hessian_forces[n][:, atom, :, j] = (force_moved - force) / step
-
-        return hessian, hessian_forces
+    def _calculate_gradient(self, mol):
+        newMP2 = MP2Calculation(mol, self.mol.basis, symm=False, opt=False)
+        return newMP2.analytical_gradient()
 
     def analytical_hessian(self):
         """
@@ -263,3 +230,17 @@ class MP2Calculation(BaseCalculation):
         The numerical gradient for each calculation
         """
         pass
+
+
+if __name__ == "__main__":
+    mol = gto.M(
+        atom='''
+                H 0 0 0
+                H 0 0 0.74
+            ''',
+        basis='sto-3g'
+    )
+
+    MP2calc = MP2Calculation(mol, mol.basis, opt=True)
+    freq = MP2calc.frequencies()
+    print(thermo.dump_normal_mode(mol, freq))

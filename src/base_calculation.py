@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from pyscf import scf, gto, grad, hessian
+import numpy
 
 
 class BaseCalculation(ABC):
@@ -69,10 +70,45 @@ class BaseCalculation(ABC):
             return grad
         return grad, grad_parts
 
+    def numerical_hessian(self, step=0.00005291772):
+        self.mol.symmetry = None
+        natm = self.mol.natm
+        grad, grad_parts = self.analytical_gradient()
+
+        hessian = numpy.zeros((natm, natm, 3, 3))
+        hessian_forces = []
+        for force in grad_parts:
+            hessian_forces.append(numpy.zeros((natm, natm, 3, 3)))
+
+        for atom in range(natm):
+            for j, coord in enumerate(['x', 'y', 'z']):
+                coords = self.mol.atom_coords()
+                coords[atom, j] += step
+                mol_moved = self.mol.set_geom_(coords, inplace=False, symmetry=None)
+                mol_moved.symmetry = None
+
+                energy_moved = self._run_calculation(mol_moved)
+
+                grad_moved, grad_parts_moved = self._calculate_gradient(mol_moved)
+
+                hessian[:, atom, :, j] = (grad_moved - grad) / step
+
+                for n, (force, force_moved) in enumerate(zip(grad_parts, grad_parts_moved)):
+                    hessian_forces[n][:, atom, :, j] = (force_moved - force) / step
+
+        return hessian, hessian_forces
+
     @abstractmethod
-    def numerical_hessian(self):
+    def _run_calculation(self, mol):
         """
-        Abstract method to compute the numerical Hessian.
+        Abstract method to run the electronic structure calculation.
+        """
+        pass
+
+    @abstractmethod
+    def _calculate_gradient(self, mol):
+        """
+        Abstract method to compute the gradient.
         """
         pass
 
