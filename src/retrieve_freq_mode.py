@@ -155,7 +155,7 @@ def harmonic_analysis_moved(mol, hess, exclude_trans=False, exclude_rot=False,
             unequal_row = numpy.dot(row, reflexion)
             unequal_mode[relation_original[atom] - 1, :] = unequal_row
 
-        threshold = 0.01
+        threshold = 0.001
 
         if numpy.allclose(new_mode, cartesian_this_mode, atol=threshold):
             problematic_freq.append(i)
@@ -173,7 +173,7 @@ def harmonic_analysis_moved(mol, hess, exclude_trans=False, exclude_rot=False,
     #     problematic_freq = 8
 
     # TODO: IR intensity
-    return results, transformed_hess, h_diagonal, problematic_freq
+    return results, h_diagonal, transformed_hess, problematic_freq
 
 
 def run_hessian_analysis(mol):
