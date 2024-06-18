@@ -40,6 +40,8 @@ def run_calculation(basis, ghost_atoms, method, ghost_basis):
         raise ValueError(f"Unsupported calculation method: {method}")
 
     hess, hess_comp = calc.numerical_hessian()
+    print('ppppp')
+    print(hess)
     freq, hessian, hessian_components, n = harmonic_analysis_moved(molecule, hess, components=hess_comp)
     results = {
         "basis": basis,

@@ -182,6 +182,7 @@ def run_hessian_analysis(mol):
     mf_opt = scf.RHF(mol).run()
     hess = mf_opt.Hessian().kernel()
     freq, hess, h, problematic_freq = harmonic_analysis_moved(mol, hess, exclude_trans=False, exclude_rot=False, imaginary_freq=False)
+    print(problematic_freq, freq['freq_wavenumber'], problematic_freq)
     return freq, hess, h, problematic_freq
 
 
@@ -202,9 +203,9 @@ H      0.000000    -2.490314     0.000000
 H     -2.157746    -1.245157     0.000000
 H     -2.157746     1.245157     0.000000
     ''',
-        basis='6-31G',
+        basis='6-31++G',
         symmetry=False
     )
 
     benzene_d6d_init.build()
-    freq, hess, h, problematic_freq = run_hessian_analysis(optimized_mol)
+    freq, hess, h, problematic_freq = run_hessian_analysis(benzene_d6d_init)
