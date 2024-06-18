@@ -242,5 +242,5 @@ if __name__ == "__main__":
     )
 
     MP2calc = MP2Calculation(mol, mol.basis, opt=True)
-    freq = MP2calc.frequencies()
-    print(thermo.dump_normal_mode(mol, freq))
+    hessian, _ = MP2calc.numerical_hessian()
+    print(hessian)

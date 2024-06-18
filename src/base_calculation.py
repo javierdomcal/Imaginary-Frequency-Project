@@ -70,7 +70,7 @@ class BaseCalculation(ABC):
             return grad
         return grad, grad_parts
 
-    def numerical_hessian(self, step=0.00005291772):
+    def numerical_hessian(self, step=0.0005291772):
         self.mol.symmetry = None
         natm = self.mol.natm
         grad, grad_parts = self.analytical_gradient()
@@ -80,9 +80,11 @@ class BaseCalculation(ABC):
         for force in grad_parts:
             hessian_forces.append(numpy.zeros((natm, natm, 3, 3)))
 
+        initial_coords = self.mol.atom_coords().copy()  # Save the initial coordinates
+
         for atom in range(natm):
             for j, coord in enumerate(['x', 'y', 'z']):
-                coords = self.mol.atom_coords()
+                coords = initial_coords.copy()  # Reset to initial coordinates before each movement
                 coords[atom, j] += step
                 mol_moved = self.mol.set_geom_(coords, inplace=False, symmetry=None)
                 mol_moved.symmetry = None
