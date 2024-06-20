@@ -182,7 +182,7 @@ def run_hessian_analysis(mol):
     mf_opt = scf.RHF(mol).run()
     hess = mf_opt.Hessian().kernel()
     freq, hess, h, problematic_freq = harmonic_analysis_moved(mol, hess, exclude_trans=False, exclude_rot=False, imaginary_freq=False)
-    print(problematic_freq, freq['freq_wavenumber'], problematic_freq)
+    print(problematic_freq, freq['freq_wavenumber'][problematic_freq[0]])
     return freq, hess, h, problematic_freq
 
 

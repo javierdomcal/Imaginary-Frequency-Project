@@ -180,7 +180,7 @@ class MP2Calculation(BaseCalculation):
         time1 = log.timer_debug1('h1 and JK1', *time1)
 
         # Hartree-Fock part contribution
-        dm1[:] = 0
+        #dm1[:] = 0
         dm1p = hf_dm1 + dm1 * 2
         dm1 += hf_dm1
         zeta += rhf_grad.make_rdm1e(mo_energy, mo_coeff, mp.mo_occ)

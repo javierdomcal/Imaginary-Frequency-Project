@@ -18,10 +18,7 @@ def gather_results(basis_family, method):
         # Run the main function and get formatted results
         formatted_results = main(basis, ghost_atoms, method, ghost_basis)
 
-        results_list.append({
-            'basis': basis,
-            'results': formatted_results
-        })
+        results_list.append(formatted_results)
 
     return results_list
 
